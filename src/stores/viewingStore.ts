@@ -1,21 +1,21 @@
-import { create } from 'zustand';
-import { Viewing, TimeSlot } from '../types';
-import { getNext7WeekdaySlots } from '../utils/slotGeneration';
+import { create } from 'zustand'
+import { Viewing, TimeSlot } from '../types'
+import { getNext7WeekdaySlots } from '../utils/slotGeneration'
 
 interface ViewingState {
-  viewings: Viewing[];
-  availableSlots: TimeSlot[];
-  timezone: string;
+  viewings: Viewing[]
+  availableSlots: TimeSlot[]
+  timezone: string
 
   // Actions
-  addViewing: (viewing: Omit<Viewing, 'id'>) => void;
-  removeViewing: (viewingId: string) => void;
-  getAvailableSlots: () => TimeSlot[];
-  getBookedSlots: () => TimeSlot[];
-  isSlotAvailable: (slotId: string) => boolean;
+  addViewing: (viewing: Omit<Viewing, 'id'>) => void
+  removeViewing: (viewingId: string) => void
+  getAvailableSlots: () => TimeSlot[]
+  getBookedSlots: () => TimeSlot[]
+  isSlotAvailable: (slotId: string) => boolean
 }
 
-const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 export const useViewingStore = create<ViewingState>((set, get) => ({
   viewings: [],
@@ -25,58 +25,58 @@ export const useViewingStore = create<ViewingState>((set, get) => ({
   addViewing: (viewingData) => {
     const newViewing: Viewing = {
       ...viewingData,
-      id: crypto.randomUUID()
-    };
+      id: crypto.randomUUID(),
+    }
 
     set((state) => {
-      const updatedSlots = state.availableSlots.map(slot => {
+      const updatedSlots = state.availableSlots.map((slot) => {
         if (slot.startTime.getTime() === viewingData.startTime.getTime()) {
           return {
             ...slot,
             isAvailable: false,
-            viewingId: newViewing.id
-          };
+            viewingId: newViewing.id,
+          }
         }
-        return slot;
-      });
+        return slot
+      })
 
       return {
         viewings: [...state.viewings, newViewing],
-        availableSlots: updatedSlots
-      };
-    });
+        availableSlots: updatedSlots,
+      }
+    })
   },
 
   removeViewing: (viewingId) => {
     set((state) => {
-      const updatedSlots = state.availableSlots.map(slot => {
+      const updatedSlots = state.availableSlots.map((slot) => {
         if (slot.viewingId === viewingId) {
           return {
             ...slot,
             isAvailable: true,
-            viewingId: undefined
-          };
+            viewingId: undefined,
+          }
         }
-        return slot;
-      });
+        return slot
+      })
 
       return {
-        viewings: state.viewings.filter(viewing => viewing.id !== viewingId),
-        availableSlots: updatedSlots
-      };
-    });
+        viewings: state.viewings.filter((viewing) => viewing.id !== viewingId),
+        availableSlots: updatedSlots,
+      }
+    })
   },
 
   getAvailableSlots: () => {
-    return get().availableSlots.filter(slot => slot.isAvailable);
+    return get().availableSlots.filter((slot) => slot.isAvailable)
   },
 
   getBookedSlots: () => {
-    return get().availableSlots.filter(slot => !slot.isAvailable);
+    return get().availableSlots.filter((slot) => !slot.isAvailable)
   },
 
   isSlotAvailable: (slotId) => {
-    const slot = get().availableSlots.find(s => s.id === slotId);
-    return slot?.isAvailable ?? false;
+    const slot = get().availableSlots.find((s) => s.id === slotId)
+    return slot?.isAvailable ?? false
   },
-}));
+}))
