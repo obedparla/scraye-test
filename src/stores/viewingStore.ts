@@ -5,6 +5,7 @@ import { getNext7WeekdaySlots } from '../utils/slotGeneration';
 interface ViewingState {
   viewings: Viewing[];
   availableSlots: TimeSlot[];
+  timezone: string;
 
   // Actions
   addViewing: (viewing: Omit<Viewing, 'id'>) => void;
@@ -15,9 +16,12 @@ interface ViewingState {
   refreshSlots: () => void;
 }
 
+const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 export const useViewingStore = create<ViewingState>((set, get) => ({
   viewings: [],
-  availableSlots: getNext7WeekdaySlots(),
+  timezone: localTimezone,
+  availableSlots: getNext7WeekdaySlots(localTimezone),
 
   addViewing: (viewingData) => {
     const newViewing: Viewing = {
@@ -79,7 +83,7 @@ export const useViewingStore = create<ViewingState>((set, get) => ({
 
   refreshSlots: () => {
     set((state) => {
-      const newSlots = getNext7WeekdaySlots();
+      const newSlots = getNext7WeekdaySlots(state.timezone);
       const bookedSlotTimes = state.viewings.map(v => v.startTime.getTime());
 
       const updatedSlots = newSlots.map(slot => {

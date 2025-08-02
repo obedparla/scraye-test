@@ -46,8 +46,8 @@ export function isWeekday(date: Date, timezone: string = 'UTC'): boolean {
 
 export function getNext7WeekdaySlots(timezone: string = 'UTC'): TimeSlot[] {
   const slots: TimeSlot[] = [];
-  const today = new Date("Mon Aug 04");
-  let daysChecked = 0;
+  const today = new Date();
+  let daysChecked = 1; // Start from tomorrow
   let weekdaysAdded = 0;
 
   while (weekdaysAdded < 7) {
