@@ -13,7 +13,6 @@ interface ViewingState {
   getAvailableSlots: () => TimeSlot[];
   getBookedSlots: () => TimeSlot[];
   isSlotAvailable: (slotId: string) => boolean;
-  refreshSlots: () => void;
 }
 
 const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -80,29 +79,4 @@ export const useViewingStore = create<ViewingState>((set, get) => ({
     const slot = get().availableSlots.find(s => s.id === slotId);
     return slot?.isAvailable ?? false;
   },
-
-  refreshSlots: () => {
-    set((state) => {
-      const newSlots = getNext7WeekdaySlots(state.timezone);
-      const bookedSlotTimes = state.viewings.map(v => v.startTime.getTime());
-
-      const updatedSlots = newSlots.map(slot => {
-        const isBooked = bookedSlotTimes.includes(slot.startTime.getTime());
-        const existingViewing = state.viewings.find(v =>
-          v.startTime.getTime() === slot.startTime.getTime()
-        );
-
-        return {
-          ...slot,
-          isAvailable: !isBooked,
-          viewingId: existingViewing?.id
-        };
-      });
-
-      return {
-        ...state,
-        availableSlots: updatedSlots
-      };
-    });
-  }
 }));

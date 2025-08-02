@@ -15,7 +15,6 @@ export default function Home() {
     addViewing, 
     removeViewing, 
     getAvailableSlots,
-    refreshSlots,
     timezone
   } = useViewingStore();
 
@@ -135,17 +134,10 @@ export default function Home() {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <CardTitle className="text-lg sm:text-xl">Available Times</CardTitle>
-                  <Button
-                    variant="ghost"
-                    onClick={refreshSlots}
-                    className="self-start"
-                  >
-                    Refresh
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
-              
+
               <div className="space-y-4 sm:space-y-6">
                 {Object.entries(availableSlotsGrouped).map(([dateKey, slots]) => (
                   <div key={dateKey}>
