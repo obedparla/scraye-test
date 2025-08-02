@@ -129,6 +129,45 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+          <div className="space-y-4 sm:space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl">Upcoming Viewings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {upcomingViewings.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No upcoming viewings scheduled</p>
+                ) : (
+                    <div className="space-y-3">
+                      {upcomingViewings.map((viewing) => (
+                          <div key={viewing.id} className="p-3 sm:p-4 border border-gray-200 rounded-lg">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
+                              <div className="text-sm font-medium text-gray-900">
+                                {viewing.viewerName}
+                              </div>
+                              <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleCancelViewing(viewing.id)}
+                                  className="text-red-600 hover:text-red-700 self-start"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                            <div className="text-sm text-gray-600 mb-1 break-words">
+                              {viewing.property}
+                            </div>
+                            <div className="text-xs sm:text-sm text-gray-500">
+                              {formatDate(viewing.startTime)} at {formatTime(viewing.startTime)}
+                            </div>
+                          </div>
+                      ))}
+                    </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="xl:col-span-2">
             <Card>
               <CardHeader>
@@ -160,45 +199,6 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-4 sm:space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Upcoming Viewings</CardTitle>
-              </CardHeader>
-              <CardContent>
-              {upcomingViewings.length === 0 ? (
-                <p className="text-gray-500 text-sm">No upcoming viewings scheduled</p>
-              ) : (
-                <div className="space-y-3">
-                  {upcomingViewings.map((viewing) => (
-                    <div key={viewing.id} className="p-3 sm:p-4 border border-gray-200 rounded-lg">
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
-                        <div className="text-sm font-medium text-gray-900">
-                          {viewing.viewerName}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleCancelViewing(viewing.id)}
-                          className="text-red-600 hover:text-red-700 self-start"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                      <div className="text-sm text-gray-600 mb-1 break-words">
-                        {viewing.property}
-                      </div>
-                      <div className="text-xs sm:text-sm text-gray-500">
-                        {formatDate(viewing.startTime)} at {formatTime(viewing.startTime)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
               </CardContent>
             </Card>
           </div>
@@ -256,6 +256,7 @@ export default function Home() {
                   onClick={handleBooking}
                   disabled={!viewerName.trim() || !property.trim() || isBooking}
                   className="flex-1"
+                  variant={"outline"}
                 >
                   {isBooking ? (
                     <>
