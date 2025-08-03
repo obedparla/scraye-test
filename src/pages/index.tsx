@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useViewingStore } from '../stores/viewingStore'
 import { TimeSlot } from '../types'
 import { format, toZonedTime } from 'date-fns-tz'
@@ -20,13 +20,21 @@ export default function Home() {
 
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
   const [viewerName, setViewerName] = useState('')
-  const [property, setProperty] = useState('')
+  const [propertyAddress, setPropertyAddress] = useState('')
   const [showBookingForm, setShowBookingForm] = useState(false)
   const [isBooking, setIsBooking] = useState(false)
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error'
     message: string
   } | null>(null)
+
+  useEffect(() => {
+    if (!showBookingForm) {
+      setViewerName('')
+      setPropertyAddress('')
+      setSelectedSlot(null)
+    }
+  }, [showBookingForm])
 
   const formatTime = (date: Date) => {
     const zonedDate = toZonedTime(date, timezone)
@@ -58,17 +66,14 @@ export default function Home() {
   }
 
   const handleBooking = async () => {
-    if (selectedSlot && viewerName.trim() && property.trim()) {
+    if (selectedSlot && viewerName.trim() && propertyAddress.trim()) {
       setIsBooking(true)
 
       try {
-        // Simulate async operation
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
         addViewing({
           startTime: selectedSlot.startTime,
           viewerName: viewerName.trim(),
-          property: property.trim(),
+          propertyAddress: propertyAddress.trim(),
         })
 
         setFeedback({
@@ -76,9 +81,6 @@ export default function Home() {
           message: 'Viewing booked successfully!',
         })
 
-        setSelectedSlot(null)
-        setViewerName('')
-        setProperty('')
         setShowBookingForm(false)
 
         // Clear feedback after 3 seconds
@@ -171,7 +173,7 @@ export default function Home() {
                           </Button>
                         </div>
                         <div className="mb-1 text-sm break-words text-gray-600">
-                          {viewing.property}
+                          {viewing.propertyAddress}
                         </div>
                         <div className="text-xs text-gray-500 sm:text-sm">
                           {formatDate(viewing.startTime)} at{' '}
@@ -246,8 +248,8 @@ export default function Home() {
                 </label>
                 <Input
                   type="text"
-                  value={property}
-                  onChange={(e) => setProperty(e.target.value)}
+                  value={propertyAddress}
+                  onChange={(e) => setPropertyAddress(e.target.value)}
                   placeholder="Enter property address"
                 />
               </div>
@@ -275,7 +277,9 @@ export default function Home() {
               </Button>
               <Button
                 onClick={handleBooking}
-                disabled={!viewerName.trim() || !property.trim() || isBooking}
+                disabled={
+                  !viewerName.trim() || !propertyAddress.trim() || isBooking
+                }
                 className="flex-1"
                 variant={'outline'}
               >

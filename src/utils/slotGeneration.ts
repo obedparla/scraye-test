@@ -4,7 +4,7 @@ import { addMinutes, isWeekend, addHours } from 'date-fns'
 
 export function generateTimeSlots(
   date: Date,
-  timezone: string = 'UTC',
+  timezone: string,
   currentTime?: Date
 ): TimeSlot[] {
   const slots: TimeSlot[] = []
@@ -48,12 +48,12 @@ export function generateTimeSlots(
   return slots
 }
 
-export function isWeekday(date: Date, timezone: string = 'UTC'): boolean {
+export function isWeekday(date: Date, timezone: string): boolean {
   const zonedDate = toZonedTime(date, timezone)
   return !isWeekend(zonedDate)
 }
 
-export function getNext7WeekdaySlots(timezone: string = 'UTC'): TimeSlot[] {
+export function getNext7WeekdaySlots(timezone: string): TimeSlot[] {
   const slots: TimeSlot[] = []
   const today = new Date()
   let daysChecked = 0 // Start from today

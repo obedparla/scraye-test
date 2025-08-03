@@ -2,7 +2,7 @@ export interface Viewing {
   id: string
   startTime: Date
   viewerName: string
-  property: string
+  propertyAddress: string
 }
 
 export interface TimeSlot {
