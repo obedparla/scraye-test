@@ -23,10 +23,10 @@ export default function Home() {
   const [propertyAddress, setPropertyAddress] = useState('')
   const [showBookingForm, setShowBookingForm] = useState(false)
   const [isBooking, setIsBooking] = useState(false)
-  const [feedback, setFeedback] = useState<{
-    type: 'success' | 'error'
-    message: string
-  } | null>(null)
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedbackType, setFeedbackType] = useState<'success' | 'error'>(
+    'success',
+  )
 
   useEffect(() => {
     if (!showBookingForm) {
@@ -36,26 +36,19 @@ export default function Home() {
     }
   }, [showBookingForm])
 
-  const formatTime = (date: Date) => {
+  const formatDateTime = (date: Date, timeFormat = 'h:mm a') => {
     const zonedDate = toZonedTime(date, timezone)
-    return format(zonedDate, 'h:mm a', { timeZone: timezone })
-  }
-
-  const formatDate = (date: Date) => {
-    const zonedDate = toZonedTime(date, timezone)
-    return format(zonedDate, 'EEEE, MMMM d', { timeZone: timezone })
+    return format(zonedDate, timeFormat, { timeZone: timezone })
   }
 
   const groupSlotsByDate = (slots: TimeSlot[]) => {
-    return slots.reduce((groups: Record<string, TimeSlot[]>, slot) => {
-      const zonedDate = toZonedTime(slot.startTime, timezone)
-      const dateKey = format(zonedDate, 'yyyy-MM-dd', { timeZone: timezone })
-      if (!groups[dateKey]) {
-        groups[dateKey] = []
-      }
+    const groups: Record<string, TimeSlot[]> = {}
+    slots.forEach((slot) => {
+      const dateKey = formatDateTime(slot.startTime, 'yyyy-MM-dd')
+      groups[dateKey] = groups[dateKey] || []
       groups[dateKey].push(slot)
-      return groups
-    }, {})
+    })
+    return groups
   }
 
   const handleSlotSelect = (slot: TimeSlot) => {
@@ -69,62 +62,29 @@ export default function Home() {
     if (selectedSlot && viewerName.trim() && propertyAddress.trim()) {
       setIsBooking(true)
 
-      try {
-        addViewing({
-          startTime: selectedSlot.startTime,
-          viewerName: viewerName.trim(),
-          propertyAddress: propertyAddress.trim(),
-        })
+      addViewing({
+        startTime: selectedSlot.startTime,
+        viewerName: viewerName.trim(),
+        propertyAddress: propertyAddress.trim(),
+      })
 
-        setFeedback({
-          type: 'success',
-          message: 'Viewing booked successfully!',
-        })
-
-        setShowBookingForm(false)
-
-        // Clear feedback after 3 seconds
-        setTimeout(() => setFeedback(null), 3000)
-      } catch (error) {
-        setFeedback({
-          type: 'error',
-          message: 'Failed to book viewing. Please try again.',
-        })
-        setTimeout(() => setFeedback(null), 3000)
-      } finally {
-        setIsBooking(false)
-      }
+      setFeedbackType('success')
+      setFeedback('Viewing booked successfully!')
+      setShowBookingForm(false)
     }
   }
 
-  const handleCancelViewing = async (viewingId: string) => {
+  const handleCancelViewing = (viewingId: string) => {
     if (confirm('Are you sure you want to cancel this viewing?')) {
-      try {
-        // Simulate async operation
-        await new Promise((resolve) => setTimeout(resolve, 500))
-
-        removeViewing(viewingId)
-
-        setFeedback({
-          type: 'success',
-          message: 'Viewing cancelled successfully!',
-        })
-
-        // Clear feedback after 3 seconds
-        setTimeout(() => setFeedback(null), 3000)
-      } catch (error) {
-        setFeedback({
-          type: 'error',
-          message: 'Failed to cancel viewing. Please try again.',
-        })
-        setTimeout(() => setFeedback(null), 3000)
-      }
+      removeViewing(viewingId)
+      setFeedbackType('success')
+      setFeedback('Viewing cancelled successfully!')
     }
   }
 
   const availableSlotsGrouped = groupSlotsByDate(getAvailableSlots())
   const upcomingViewings = viewings.sort(
-    (a, b) => a.startTime.getTime() - b.startTime.getTime()
+    (a, b) => a.startTime.getTime() - b.startTime.getTime(),
   )
 
   return (
@@ -176,8 +136,8 @@ export default function Home() {
                           {viewing.propertyAddress}
                         </div>
                         <div className="text-xs text-gray-500 sm:text-sm">
-                          {formatDate(viewing.startTime)} at{' '}
-                          {formatTime(viewing.startTime)}
+                          {formatDateTime(viewing.startTime, 'EEEE, MMMM d')} at{' '}
+                          {formatDateTime(viewing.startTime)}
                         </div>
                       </div>
                     ))}
@@ -202,7 +162,7 @@ export default function Home() {
                     ([dateKey, slots]) => (
                       <div key={dateKey}>
                         <h3 className="mb-2 text-base font-medium text-gray-900 sm:mb-3 sm:text-lg">
-                          {formatDate(slots[0].startTime)}
+                          {formatDateTime(slots[0].startTime, 'EEEE, MMMM d')}
                         </h3>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5">
                           {slots.map((slot) => (
@@ -213,12 +173,12 @@ export default function Home() {
                               onClick={() => handleSlotSelect(slot)}
                               className="touch-manipulation p-2 text-xs sm:p-3 sm:text-sm"
                             >
-                              {formatTime(slot.startTime)}
+                              {formatDateTime(slot.startTime)}
                             </Button>
                           ))}
                         </div>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </CardContent>
@@ -235,8 +195,8 @@ export default function Home() {
             {selectedSlot && (
               <div className="mb-4 rounded-lg bg-blue-50 p-3">
                 <div className="text-sm break-words text-blue-700">
-                  {formatDate(selectedSlot.startTime)} at{' '}
-                  {formatTime(selectedSlot.startTime)}
+                  {formatDateTime(selectedSlot.startTime, 'EEEE, MMMM d')} at{' '}
+                  {formatDateTime(selectedSlot.startTime)}
                 </div>
               </div>
             )}
@@ -299,25 +259,23 @@ export default function Home() {
         {feedback && (
           <Alert
             className={`fixed top-4 right-4 z-50 max-w-sm ${
-              feedback.type === 'success'
+              feedbackType === 'success'
                 ? 'border-green-200 bg-green-50'
                 : 'border-red-200 bg-red-50'
             }`}
           >
             <div className="flex items-center gap-2">
-              {feedback.type === 'success' ? (
+              {feedbackType === 'success' ? (
                 <CheckCircle className="h-4 w-4 text-green-600" />
               ) : (
                 <XCircle className="h-4 w-4 text-red-600" />
               )}
               <AlertDescription
                 className={`font-medium ${
-                  feedback.type === 'success'
-                    ? 'text-green-800'
-                    : 'text-red-800'
+                  feedbackType === 'success' ? 'text-green-800' : 'text-red-800'
                 }`}
               >
-                {feedback.message}
+                {feedback}
               </AlertDescription>
               <Button
                 variant="ghost"

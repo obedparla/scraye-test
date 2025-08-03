@@ -1,6 +1,6 @@
 import { TimeSlot } from '../types'
 import { toZonedTime, fromZonedTime } from 'date-fns-tz'
-import { addMinutes, isWeekend, addHours } from 'date-fns'
+import { addMinutes, isWeekend } from 'date-fns'
 
 export function generateTimeSlots(
   date: Date,

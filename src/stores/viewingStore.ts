@@ -11,8 +11,6 @@ interface ViewingState {
   addViewing: (viewing: Omit<Viewing, 'id'>) => void
   removeViewing: (viewingId: string) => void
   getAvailableSlots: () => TimeSlot[]
-  getBookedSlots: () => TimeSlot[]
-  isSlotAvailable: (slotId: string) => boolean
 }
 
 const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -69,14 +67,5 @@ export const useViewingStore = create<ViewingState>((set, get) => ({
 
   getAvailableSlots: () => {
     return get().availableSlots.filter((slot) => slot.isAvailable)
-  },
-
-  getBookedSlots: () => {
-    return get().availableSlots.filter((slot) => !slot.isAvailable)
-  },
-
-  isSlotAvailable: (slotId) => {
-    const slot = get().availableSlots.find((s) => s.id === slotId)
-    return slot?.isAvailable ?? false
   },
 }))
