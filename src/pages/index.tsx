@@ -1,91 +1,91 @@
-import { useEffect, useState } from 'react'
-import { useViewingStore } from '../stores/viewingStore'
-import { TimeSlot } from '../types'
-import { format, toZonedTime } from 'date-fns-tz'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { useEffect, useState } from "react";
+import { useViewingStore } from "../stores/viewingStore";
+import { TimeSlot } from "../types";
+import { format, toZonedTime } from "date-fns-tz";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CheckCircle, XCircle, X, Loader2 } from 'lucide-react'
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle, XCircle, X, Loader2 } from "lucide-react";
 
 export default function Home() {
   const { viewings, addViewing, removeViewing, getAvailableSlots, timezone } =
-    useViewingStore()
+    useViewingStore();
 
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
-  const [viewerName, setViewerName] = useState('')
-  const [propertyAddress, setPropertyAddress] = useState('')
-  const [showBookingForm, setShowBookingForm] = useState(false)
-  const [isBooking, setIsBooking] = useState(false)
-  const [feedback, setFeedback] = useState<string | null>(null)
-  const [feedbackType, setFeedbackType] = useState<'success' | 'error'>(
-    'success',
-  )
+  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [viewerName, setViewerName] = useState("");
+  const [propertyAddress, setPropertyAddress] = useState("");
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedbackType, setFeedbackType] = useState<"success" | "error">(
+    "success",
+  );
 
   useEffect(() => {
     if (!showBookingForm) {
-      setViewerName('')
-      setPropertyAddress('')
-      setSelectedSlot(null)
+      setViewerName("");
+      setPropertyAddress("");
+      setSelectedSlot(null);
     }
-  }, [showBookingForm])
+  }, [showBookingForm]);
 
-  const formatDateTime = (date: Date, timeFormat = 'h:mm a') => {
-    const zonedDate = toZonedTime(date, timezone)
-    return format(zonedDate, timeFormat, { timeZone: timezone })
-  }
+  const formatDateTime = (date: Date, timeFormat = "h:mm a") => {
+    const zonedDate = toZonedTime(date, timezone);
+    return format(zonedDate, timeFormat, { timeZone: timezone });
+  };
 
   const groupSlotsByDate = (slots: TimeSlot[]) => {
-    const groups: Record<string, TimeSlot[]> = {}
+    const groups: Record<string, TimeSlot[]> = {};
     slots.forEach((slot) => {
-      const dateKey = formatDateTime(slot.startTime, 'yyyy-MM-dd')
-      groups[dateKey] = groups[dateKey] || []
-      groups[dateKey].push(slot)
-    })
-    return groups
-  }
+      const dateKey = formatDateTime(slot.startTime, "yyyy-MM-dd");
+      groups[dateKey] = groups[dateKey] || [];
+      groups[dateKey].push(slot);
+    });
+    return groups;
+  };
 
   const handleSlotSelect = (slot: TimeSlot) => {
     if (slot.isAvailable) {
-      setSelectedSlot(slot)
-      setShowBookingForm(true)
+      setSelectedSlot(slot);
+      setShowBookingForm(true);
     }
-  }
+  };
 
   const handleBooking = async () => {
     if (selectedSlot && viewerName.trim() && propertyAddress.trim()) {
-      setIsBooking(true)
+      setIsBooking(true);
 
       addViewing({
         startTime: selectedSlot.startTime,
         viewerName: viewerName.trim(),
         propertyAddress: propertyAddress.trim(),
-      })
+      });
 
-      setFeedbackType('success')
-      setFeedback('Viewing booked successfully!')
-      setShowBookingForm(false)
+      setFeedbackType("success");
+      setFeedback("Viewing booked successfully!");
+      setShowBookingForm(false);
     }
-  }
+  };
 
   const handleCancelViewing = (viewingId: string) => {
-    if (confirm('Are you sure you want to cancel this viewing?')) {
-      removeViewing(viewingId)
-      setFeedbackType('success')
-      setFeedback('Viewing cancelled successfully!')
+    if (confirm("Are you sure you want to cancel this viewing?")) {
+      removeViewing(viewingId);
+      setFeedbackType("success");
+      setFeedback("Viewing cancelled successfully!");
     }
-  }
+  };
 
-  const availableSlotsGrouped = groupSlotsByDate(getAvailableSlots())
+  const availableSlotsGrouped = groupSlotsByDate(getAvailableSlots());
   const upcomingViewings = viewings.sort(
     (a, b) => a.startTime.getTime() - b.startTime.getTime(),
-  )
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,7 +136,7 @@ export default function Home() {
                           {viewing.propertyAddress}
                         </div>
                         <div className="text-xs text-gray-500 sm:text-sm">
-                          {formatDateTime(viewing.startTime, 'EEEE, MMMM d')} at{' '}
+                          {formatDateTime(viewing.startTime, "EEEE, MMMM d")} at{" "}
                           {formatDateTime(viewing.startTime)}
                         </div>
                       </div>
@@ -162,7 +162,7 @@ export default function Home() {
                     ([dateKey, slots]) => (
                       <div key={dateKey}>
                         <h3 className="mb-2 text-base font-medium text-gray-900 sm:mb-3 sm:text-lg">
-                          {formatDateTime(slots[0].startTime, 'EEEE, MMMM d')}
+                          {formatDateTime(slots[0].startTime, "EEEE, MMMM d")}
                         </h3>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5">
                           {slots.map((slot) => (
@@ -195,7 +195,7 @@ export default function Home() {
             {selectedSlot && (
               <div className="mb-4 rounded-lg bg-blue-50 p-3">
                 <div className="text-sm break-words text-blue-700">
-                  {formatDateTime(selectedSlot.startTime, 'EEEE, MMMM d')} at{' '}
+                  {formatDateTime(selectedSlot.startTime, "EEEE, MMMM d")} at{" "}
                   {formatDateTime(selectedSlot.startTime)}
                 </div>
               </div>
@@ -241,7 +241,7 @@ export default function Home() {
                   !viewerName.trim() || !propertyAddress.trim() || isBooking
                 }
                 className="flex-1"
-                variant={'outline'}
+                variant={"outline"}
               >
                 {isBooking ? (
                   <>
@@ -249,7 +249,7 @@ export default function Home() {
                     Booking...
                   </>
                 ) : (
-                  'Book Viewing'
+                  "Book Viewing"
                 )}
               </Button>
             </div>
@@ -259,20 +259,20 @@ export default function Home() {
         {feedback && (
           <Alert
             className={`fixed top-4 right-4 z-50 max-w-sm ${
-              feedbackType === 'success'
-                ? 'border-green-200 bg-green-50'
-                : 'border-red-200 bg-red-50'
+              feedbackType === "success"
+                ? "border-green-200 bg-green-50"
+                : "border-red-200 bg-red-50"
             }`}
           >
             <div className="flex items-center gap-2">
-              {feedbackType === 'success' ? (
+              {feedbackType === "success" ? (
                 <CheckCircle className="h-4 w-4 text-green-600" />
               ) : (
                 <XCircle className="h-4 w-4 text-red-600" />
               )}
               <AlertDescription
                 className={`font-medium ${
-                  feedbackType === 'success' ? 'text-green-800' : 'text-red-800'
+                  feedbackType === "success" ? "text-green-800" : "text-red-800"
                 }`}
               >
                 {feedback}
@@ -290,5 +290,5 @@ export default function Home() {
         )}
       </div>
     </div>
-  )
+  );
 }
