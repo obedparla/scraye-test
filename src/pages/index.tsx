@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle, XCircle, X, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, X } from "lucide-react";
 
 export default function Home() {
   const { viewings, addViewing, removeViewing, getAvailableSlots, timezone } =
@@ -20,18 +20,14 @@ export default function Home() {
 
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [viewerName, setViewerName] = useState("");
-  const [propertyAddress, setPropertyAddress] = useState("");
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [isBooking, setIsBooking] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [feedbackType, setFeedbackType] = useState<"success" | "error">(
-    "success",
+  const [feedbackType, setFeedbackType] = useState<null | "success" | "error">(
+    null,
   );
 
   useEffect(() => {
     if (!showBookingForm) {
       setViewerName("");
-      setPropertyAddress("");
       setSelectedSlot(null);
     }
   }, [showBookingForm]);
@@ -59,26 +55,23 @@ export default function Home() {
   };
 
   const handleBooking = async () => {
-    if (selectedSlot && viewerName.trim() && propertyAddress.trim()) {
-      setIsBooking(true);
-
+    if (selectedSlot && viewerName.trim()) {
       addViewing({
         startTime: selectedSlot.startTime,
         viewerName: viewerName.trim(),
-        propertyAddress: propertyAddress.trim(),
       });
 
       setFeedbackType("success");
-      setFeedback("Viewing booked successfully!");
       setShowBookingForm(false);
+      setTimeout(() => setFeedbackType(null), 3000);
     }
   };
 
   const handleCancelViewing = (viewingId: string) => {
     if (confirm("Are you sure you want to cancel this viewing?")) {
       removeViewing(viewingId);
-      setFeedbackType("success");
-      setFeedback("Viewing cancelled successfully!");
+      setFeedbackType("error");
+      setTimeout(() => setFeedbackType(null), 3000);
     }
   };
 
@@ -131,9 +124,6 @@ export default function Home() {
                           >
                             Cancel
                           </Button>
-                        </div>
-                        <div className="mb-1 text-sm break-words text-gray-600">
-                          {viewing.propertyAddress}
                         </div>
                         <div className="text-xs text-gray-500 sm:text-sm">
                           {formatDateTime(viewing.startTime, "EEEE, MMMM d")} at{" "}
@@ -204,18 +194,6 @@ export default function Home() {
             <div className="space-y-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Property Address
-                </label>
-                <Input
-                  type="text"
-                  value={propertyAddress}
-                  onChange={(e) => setPropertyAddress(e.target.value)}
-                  placeholder="Enter property address"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
                   Viewer Name
                 </label>
                 <Input
@@ -237,32 +215,20 @@ export default function Home() {
               </Button>
               <Button
                 onClick={handleBooking}
-                disabled={
-                  !viewerName.trim() || !propertyAddress.trim() || isBooking
-                }
+                disabled={!viewerName.trim()}
                 className="flex-1"
                 variant={"outline"}
               >
-                {isBooking ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Booking...
-                  </>
-                ) : (
-                  "Book Viewing"
-                )}
+                Book Viewing
               </Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        {feedback && (
+        {feedbackType && (
           <Alert
-            className={`fixed top-4 right-4 z-50 max-w-sm ${
-              feedbackType === "success"
-                ? "border-green-200 bg-green-50"
-                : "border-red-200 bg-red-50"
-            }`}
+            className={`fixed top-4 right-4 z-50 max-w-sm`}
+            variant={feedbackType === "success" ? "default" : "destructive"}
           >
             <div className="flex items-center gap-2">
               {feedbackType === "success" ? (
@@ -275,12 +241,14 @@ export default function Home() {
                   feedbackType === "success" ? "text-green-800" : "text-red-800"
                 }`}
               >
-                {feedback}
+                {feedbackType === "success"
+                  ? "Viewing booked successfully!"
+                  : "Viewing cancelled successfully!"}
               </AlertDescription>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setFeedback(null)}
+                onClick={() => setFeedbackType(null)}
                 className="ml-auto h-auto p-1 text-gray-400 hover:text-gray-600"
               >
                 <X className="h-4 w-4" />
